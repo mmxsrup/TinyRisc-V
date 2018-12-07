@@ -8,8 +8,8 @@ module icache #(
 	input [31 : 0] addr,
 	input req,
 	// to fetch
-	output reg [31 : 0] data,
-	output reg valid
+	output [31 : 0] data,
+	output valid
 
 	// from main memory
 	// TODO
@@ -42,37 +42,32 @@ module icache #(
 	assign addr_index = addr[13 : 2];
 	assign hit = (tag[addr_index] == addr_tag);
 
+	assign valid = hit;
+	assign data = (hit) ? cache_data[addr_index] : 32'b0;
 
+	// state machine
 	always @(posedge clk) begin
 		if (rst) begin
-			data <= 32'b0;
-			valid <= 1'b0;
 			state <= IDLE;
 		end else begin
 
 			case (state)
 				IDLE : state <= RUN;
 				RUN  : begin
-					if (req == 1'b1) begin // read request
-						if (hit == 1'b1) begin // HIT
-							data <= cache_data[addr_index];
-							valid <= 1'b1;
+					if (req) begin // read request
+						if (hit) begin // HIT
+							state <= RUN;
 						end else begin // MISS
 							state <= MISS;
 						end
 					end else begin
-						data <= 32'b0;
-						valid <= 1'b0;
+						state <= RUN;
 					end
 				end
 				MISS : begin // TODO
-					data <= 32'b0;
-					valid <= 1'b0;
 					state <= MISS;
 				end
 				default : begin
-					data <= 32'b0;
-					valid <= 1'b0;
 					state <= IDLE;
 				end
 			endcase // case (state)
