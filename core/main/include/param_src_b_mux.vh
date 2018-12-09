@@ -9,6 +9,7 @@
 `define SEL_SRC_B_4      3'h3
 `define SEL_SRC_B_12     3'h4
 `define SEL_SRC_B_IMMS12 3'h5 // (imm << 12)
+`define SEL_SRC_B_NONE   3'h0
 
 
 `endif
