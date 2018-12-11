@@ -16,9 +16,8 @@ module src_b_mux
 		case (select)
 			`SEL_SRC_B_RS2    : alu_src_b = rs2_data;
 			`SEL_SRC_B_IMM    : alu_src_b = imm;
-			`SEL_SRC_B_4      : alu_src_b = 32'h4;
-			`SEL_SRC_B_12     : alu_src_b = 32'h12;
-			`SEL_SRC_B_IMMS12 : alu_src_b = (imm << 12);
+			`SEL_SRC_B_0      : alu_src_b = 32'h0;
+			`SEL_SRC_B_4     : alu_src_b = 32'h4;
 			default : alu_src_b = 32'b0;
 		endcase
 	end // always @(*)

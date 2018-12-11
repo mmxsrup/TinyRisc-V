@@ -20,7 +20,7 @@ module tb_src_b_mux ();
 		imm = 32'b100;
 		#(STEP * 10)
 
-		for (integer i = 0; i <= 5; i = i + 1) begin
+		for (integer i = 0; i <= 4; i = i + 1) begin
 			select = i;
 			#(STEP)
 			$display("alu_src_b: %b", alu_src_b);
