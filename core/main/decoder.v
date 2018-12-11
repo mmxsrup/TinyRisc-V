@@ -133,10 +133,14 @@ module decoder
 	// generate src_a_sel
 	always @(*) begin
 		case (type)
-			TYPE_I, TYPE_R, TYPE_S : src_a_sel = `SEL_SRC_A_RS1;
+			TYPE_I, TYPE_R, TYPE_S : begin
+				if (opcode == 7'b1100111) src_a_sel = `SEL_SRC_A_PC; // JALR
+				else src_a_sel = `SEL_SRC_A_RS1;
+			end
+			TYPE_R, TYPE_S : src_a_sel = `SEL_SRC_A_RS1;
 			TYPE_B : src_a_sel = `SEL_SRC_A_NONE;
 			TYPE_U : begin
-				case (func7)
+				case (opcode)
 					7'b0110111 : src_a_sel = `SEL_SRC_A_IMM; // LUI
 					7'b0010111 : src_a_sel = `SEL_SRC_A_PC; // AUIPC
 					default  : src_a_sel = `SEL_SRC_A_NONE;
@@ -151,10 +155,14 @@ module decoder
 	// generate src_b_sel
 	always @(*) begin
 		case (type)
-			TYPE_I, TYPE_S : src_b_sel = `SEL_SRC_B_IMM;
+			TYPE_I : begin
+				if (opcode == 7'b1100111) src_b_sel = `SEL_SRC_B_4; // JALR
+				else src_b_sel = `SEL_SRC_B_IMM;
+			end
+			TYPE_S : src_b_sel = `SEL_SRC_B_IMM;
 			TYPE_R, TYPE_B : src_b_sel = `SEL_SRC_B_RS2;
 			TYPE_U : begin
-				case (func7)
+				case (opcode)
 					7'b0110111 : src_b_sel = `SEL_SRC_B_0; // LUI
 					7'b0010111 : src_b_sel = `SEL_SRC_B_IMM; // AUIPC
 					default  : src_b_sel = `SEL_SRC_B_NONE;
