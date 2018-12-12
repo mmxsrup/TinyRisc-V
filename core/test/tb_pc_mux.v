@@ -7,7 +7,7 @@ module tb_pc_mux ();
 	reg [31 : 0] pc;	
 	reg [31 : 0] rs1;
 	reg [31 : 0] imm;
-	reg [`PC_SEL_WIDTH - 1 : 0] pc_sel;
+	reg [`SEL_PC_WIDTH - 1 : 0] pc_sel;
 	reg taken;
 	reg stall;
 	wire [31 : 0] next_pc;
@@ -24,31 +24,31 @@ module tb_pc_mux ();
 		pc = 32'h0;
 		rs1 = 32'h8;
 		imm = 32'h8;
-		pc_sel = `PC_SEL_NONE;
+		pc_sel = `SEL_PC_NONE;
 		taken = 0;
 		stall = 0;
 		#(STEP * 10)
 
 		// pc = pc + 4
 		for (integer i = 0; i < 4; i = i + 1) begin
-			#(STEP) pc_sel = `PC_SEL_ADD4;
+			#(STEP) pc_sel = `SEL_PC_ADD4;
 			$display("next_pc: %h", next_pc);
 			pc = next_pc;
 		end
 
 		// pc = pc + imm
-		#(STEP) pc_sel = `PC_SEL_JAL; taken = 1;
+		#(STEP) pc_sel = `SEL_PC_JAL; taken = 1;
 		$display("next_pc: %h", next_pc);
 		pc = next_pc;
 
 		// pc = rs1 + imm;
-		#(STEP) pc_sel = `PC_SEL_JALR; taken = 1;
+		#(STEP) pc_sel = `SEL_PC_JALR; taken = 1;
 		$display("next_pc: %h", next_pc);
 		pc = next_pc;
 
 		// pc = pc
 		for (integer i = 0; i < 4; i = i + 1) begin
-			#(STEP) stall = 1; pc_sel = `PC_SEL_ADD4; taken = 0;
+			#(STEP) stall = 1; pc_sel = `SEL_PC_ADD4; taken = 0;
 			$display("next_pc: %h", next_pc);
 			pc = next_pc;
 		end
