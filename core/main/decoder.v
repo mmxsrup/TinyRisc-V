@@ -19,8 +19,8 @@ module decoder
 	output reg [`SEL_SRC_A_WIDTH - 1 : 0] src_a_sel,
 	// to src_b_mux
 	output reg [`SEL_SRC_B_WIDTH - 1 : 0] src_b_sel,
-	// to write back
-	output wr_reg
+	// to write back to reg
+	output wb_reg
 );
 	
 	parameter TYPE_WIDTH = 3;
@@ -175,7 +175,7 @@ module decoder
 
 
 	// generate write back signal
-	assign wr_reg = (type == TYPE_I || type == TYPE_R || type == TYPE_U || type == TYPE_J) ? 1 : 0;
+	assign wb_reg = (type == TYPE_I || type == TYPE_R || type == TYPE_U || type == TYPE_J) ? 1 : 0;
 
 
 endmodule // decoder
