@@ -2,7 +2,7 @@
 `include "param_src_a_mux.vh"
 `include "param_src_b_mux.vh"
 
-module tb_decoder ();
+module tb_decode ();
 
 	localparam STEP = 10;
 
@@ -17,7 +17,7 @@ module tb_decoder ();
 	wire wb_reg;
 
 
-	decoder decoder(
+	decode decode (
 		.code(code),
 		.rs1_num(rs1_num), .rs2_num(rs2_num), 
 		.rd_num(rd_num), .imm(imm),
@@ -65,4 +65,4 @@ module tb_decoder ();
 		#(STEP * 100) $stop;
 	end
 
-endmodule // tb_decoder
+endmodule // tb_decode

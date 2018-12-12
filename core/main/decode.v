@@ -2,7 +2,7 @@
 `include "param_src_a_mux.vh"
 `include "param_src_b_mux.vh"
 
-module decoder
+module decode
 (
 	// from fetch
 	input wire [31 : 0] code,
@@ -178,4 +178,4 @@ module decoder
 	assign wb_reg = (type == TYPE_I || type == TYPE_R || type == TYPE_U || type == TYPE_J) ? 1 : 0;
 
 
-endmodule // decoder
+endmodule // decode
