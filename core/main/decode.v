@@ -1,6 +1,7 @@
 `include "param_alu_op.vh"	
 `include "param_src_a_mux.vh"
 `include "param_src_b_mux.vh"
+`include "param_pc_mux.vh"
 
 module decode
 (
@@ -19,8 +20,10 @@ module decode
 	output reg [`SEL_SRC_A_WIDTH - 1 : 0] src_a_sel,
 	// to src_b_mux
 	output reg [`SEL_SRC_B_WIDTH - 1 : 0] src_b_sel,
-	// to write back to reg
-	output wb_reg
+	// to fetch
+	output reg [`SEL_PC_WIDTH - 1 : 0] pc_sel,
+	// to write back
+	output wb_reg // write back to reg
 );
 	
 	parameter TYPE_WIDTH = 3;
@@ -171,6 +174,16 @@ module decode
 			TYPE_J : src_b_sel = `SEL_SRC_B_4;
 			default : src_b_sel = `SEL_SRC_B_NONE;
 		endcase // type
+	end // always @(*)
+
+
+	// generate pc_sel
+	always @(*) begin
+		case (opcode)
+			7'b1101111 : pc_sel = `SEL_PC_JAL;
+			7'b1100111 : pc_sel = `SEL_PC_JALR;
+			default  : pc_sel = `SEL_PC_ADD4;
+		endcase // opcode
 	end // always @(*)
 
 
