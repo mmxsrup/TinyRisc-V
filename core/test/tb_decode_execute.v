@@ -19,6 +19,7 @@ module tb_decode_execute ();
 	wire [6 : 0] opcode;
 	wire [2 : 0] func3;
 
+	wire [31 : 0] imm;
 	wire br_taken;
 	wire [`SEL_PC_WIDTH - 1 : 0] pc_sel;
 
@@ -29,7 +30,7 @@ module tb_decode_execute ();
 		.rs1_num(rs1_num), .rs2_num(rs2_num),
 		.opcode(opcode), .func3(func3),
 		.wb_reg(wb_reg), .rd_num(rd_num), .rd_data(rd_data),
-		.pc_sel(pc_sel), .br_taken(br_taken)
+		.imm(imm), .pc_sel(pc_sel), .br_taken(br_taken)
 	);
 
 

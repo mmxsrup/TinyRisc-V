@@ -24,13 +24,14 @@ module decode_execute ( // decode and execute
 	output [31 : 0] rd_data,
 
 	// to fetch
+	output [31 : 0] imm,
 	output [`SEL_PC_WIDTH - 1 : 0] pc_sel,
 	output br_taken
 );
 	
 	parameter OP_BRANCH = 7'b1100011;
 
-	wire [31 : 0] imm;
+	wire [31 : 0] imm_w;
 	wire [31 : 0] alu_out;
 	wire [6 : 0] opcode;
 	wire [`ALU_OP_WIDTH - 1 : 0]  alu_op_sel;
@@ -42,18 +43,18 @@ module decode_execute ( // decode and execute
 
 	assign br_taken = (opcode == OP_BRANCH && alu_out == 32'b1) ? 1 : 0;
 	assign rd_data = alu_out;
-
+	assign imm = imm_w;
 
 	decode decode (
 		.code(ir),
-		.rs1_num(rs1_num), .rs2_num(rs2_num), .rd_num(rd_num), .imm(imm),
+		.rs1_num(rs1_num), .rs2_num(rs2_num), .rd_num(rd_num), .imm(imm_w),
 		.alu_op_sel(alu_op_sel),
 		.src_a_sel(src_a_sel), .src_b_sel(src_b_sel), .pc_sel(pc_sel),
 		.wb_reg(wb_reg)
 	);
 
 	execute execute (
-		.pc(pc), .imm(imm),
+		.pc(pc), .imm(imm_w),
 		.alu_op_sel(alu_op_sel), .src_a_sel(src_a_sel), .src_b_sel(src_b_sel),
 		.rs1_data(rs1_data), .rs2_data(rs2_data),
 		.alu_out(alu_out)
