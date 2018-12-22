@@ -9,6 +9,7 @@ module memory_writeback
 	input wb_reg,
 	input [4 : 0] rd_num,
 	input [31 : 0] alu_out,
+	input [31 : 0] rs2_data,
 
 	// to regfile
 	output wb_enable,
@@ -27,7 +28,7 @@ module memory_writeback
 
 	memory memory (
 		.clk(clk), .rst(rst),
-		.opcode(opcode), .func3(func3), .alu_out(alu_out), .rs2(rs2),
+		.opcode(opcode), .func3(func3), .alu_out(alu_out), .rs2(rs2_data),
 		.rdata(dcache_out), .done(done)
 	);
 

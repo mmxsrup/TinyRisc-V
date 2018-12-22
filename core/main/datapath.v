@@ -78,7 +78,7 @@ module datapath (
 	memory_writeback memory_writeback (
 		.clk(clk), .rst(rst),
 		.opcode(DE_MW_opcode_w), .func3(DE_MW_func3_w),
-		.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .alu_out(DE_MW_rd_data_w),
+		.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .alu_out(DE_MW_rd_data_w), .rs2_data(rs2_data),
 		.wb_enable(wb_enable), .wb_rd_num(wb_rd_num), .wb_rd_data(wb_rd_data), // to regfile
 		.done(memory_done) // to controller
 	);
