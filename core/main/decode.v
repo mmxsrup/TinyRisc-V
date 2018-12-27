@@ -6,17 +6,17 @@
 module decode
 (
 	// from fetch
-	input wire [31 : 0] code,
+	input [31 : 0] code,
 	// from regfile
 	input [31 : 0] rs1_data,
 	// from csr
 	input [31 : 0] csr_rdata,
 
 	// to alu etc..
-	output wire [4 : 0] rs1_num,
-	output wire [4 : 0] rs2_num,
-	output wire [4 : 0] rd_num,
-	output reg  [31 : 0] imm,
+	output [4 : 0] rs1_num,
+	output [4 : 0] rs2_num,
+	output [4 : 0] rd_num,
+	output reg [31 : 0] imm,
 
 	// to alu
 	output reg [`ALU_OP_WIDTH - 1 : 0]  alu_op_sel,
