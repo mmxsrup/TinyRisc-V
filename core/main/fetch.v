@@ -1,3 +1,5 @@
+`include "param_pc_mux.vh"
+
 module fetch (
 	input clk,
 	input rst,
@@ -9,7 +11,7 @@ module fetch (
 	// from decoder
 	input [31 : 0] rs1,
 	input [31 : 0] imm,
-	input [31 : 0] pc_sel,
+	input [`SEL_PC_WIDTH - 1 : 0] pc_sel,
 
 	// from br_cond
 	input taken,
@@ -40,7 +42,7 @@ module fetch (
 	wire [31 : 0] pc_mux_out;
 
 	assign ir_code = (icache_valid) ? icache_data : NOP;
-	assign icache_addr = pc_mux_out;
+	assign icache_addr = pc;
 	assign next_pc = pc_mux_out;
 	assign icache_req = (state == RUN) ? 1'b1 : 1'b0;
 
