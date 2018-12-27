@@ -220,6 +220,6 @@ module decode
 		endcase
 	end
 
-	assign csr_wb = (opcode == 7'b1110011) ? 1 : 0;
+	assign wb_csr = (opcode == 7'b1110011) ? 1 : 0;
 
 endmodule // decode
