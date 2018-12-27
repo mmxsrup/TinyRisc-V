@@ -7,7 +7,11 @@ module decode
 (
 	// from fetch
 	input wire [31 : 0] code,
-	
+	// from regfile
+	input [31 : 0] rs1_data,
+	// from csr
+	input [31 : 0] csr_rdata,
+
 	// to alu etc..
 	output wire [4 : 0] rs1_num,
 	output wire [4 : 0] rs2_num,
@@ -23,7 +27,11 @@ module decode
 	// to fetch
 	output reg [`SEL_PC_WIDTH - 1 : 0] pc_sel,
 	// to write back
-	output wb_reg // write back to reg
+	output wb_reg, // write back to reg
+
+	// to csr
+	output reg [31 : 0] csr_wdata,
+	output wb_csr // write back to csr
 );
 	
 	parameter TYPE_WIDTH = 3;
@@ -190,5 +198,29 @@ module decode
 	// generate write back signal
 	assign wb_reg = (type == TYPE_I || type == TYPE_R || type == TYPE_U || type == TYPE_J) ? 1 : 0;
 
+
+	wire [31 : 0] zimm;
+	assign zimm = {27'b0, code[19 : 15]};
+
+	// generate csr_wdata
+	always @(*) begin
+		case (func3)
+			// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
+			3'b001 : csr_wdata = rs1_data;
+			// csrrs rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|x[rs1]; x[rd]=t
+			3'b010 : csr_wdata = csr_rdata | rs1_data;
+			// csrrc rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t&~x[rs1]; x[rd]=t
+			3'b011 : csr_wdata = csr_rdata & ~rs1_data;
+			// csrrwi rd,csr,zimm[4:0] x[rd]=CSRs[csr]; CSRs[csr]=zimm
+			3'b101 : csr_wdata = zimm;
+			// csrrsi rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|zimm; x[rd]=t
+			3'b110 : csr_wdata = csr_rdata | zimm;
+			// csrrci rd,csr,zimm[4:0] t=CSRs[csr]; CSRs[csr]=t&~zimm; x[rd]=t
+			3'b111 : csr_wdata = csr_rdata & ~zimm;
+			default: csr_wdata = csr_rdata;
+		endcase
+	end
+
+	assign csr_wb = (opcode == 7'b1110011) ? 1 : 0;
 
 endmodule // decode

@@ -12,6 +12,9 @@ module decode_execute ( // decode and execute
 	input [31 : 0] rs1_data,
 	input [31 : 0] rs2_data,
 
+	// from csr_file
+	input [31 : 0] csr_rdata,
+
 	// to regfile
 	output [4 : 0] rs1_num,
 	output [4 : 0] rs2_num,
@@ -26,7 +29,12 @@ module decode_execute ( // decode and execute
 	// to fetch
 	output [31 : 0] imm,
 	output [`SEL_PC_WIDTH - 1 : 0] pc_sel,
-	output br_taken
+	output br_taken,
+
+	// to csr_file
+	output [11 : 0] csr_addr,
+	output [31 : 0] csr_wdata,
+	output wb_csr
 );
 	
 	parameter OP_BRANCH = 7'b1100011;
@@ -42,15 +50,18 @@ module decode_execute ( // decode and execute
 	assign func3  = ir[14 : 12];
 
 	assign br_taken = (opcode == OP_BRANCH && alu_out == 32'b1) ? 1 : 0;
-	assign rd_data = alu_out;
+	assign rd_data = (opcode == 7'b1110011) ? csr_rdata : alu_out;
 	assign imm = imm_w;
 
+	assign csr_addr = ir[31 : 20];
+
 	decode decode (
-		.code(ir),
+		.code(ir), .rs1_data(rs1_data), .csr_rdata(csr_rdata),
 		.rs1_num(rs1_num), .rs2_num(rs2_num), .rd_num(rd_num), .imm(imm_w),
 		.alu_op_sel(alu_op_sel),
 		.src_a_sel(src_a_sel), .src_b_sel(src_b_sel), .pc_sel(pc_sel),
-		.wb_reg(wb_reg)
+		.wb_reg(wb_reg),
+		.csr_wdata(csr_wdata), .wb_csr(wb_csr)
 	);
 
 	execute execute (

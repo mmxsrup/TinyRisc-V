@@ -25,10 +25,16 @@ module datapath (
 	wire [4 : 0] wb_rd_num;
 	wire [31 : 0] wb_rd_data;
 	wire wb_enable;
+	wire [31 : 0] csr_addr;
+	wire [31 : 0] csr_rdata;
+	wire [31 : 0] csr_wdata;
+	wire wb_csr;
 
 
 	// from fetch to decode_execute
 	wire [31 : 0] F_DE_ir_w;
+
+	wire [31 : 0] DE_F_imm;
 
 	// from decode_execute to memory_writeback
 	wire [6 : 0] DE_MW_opcode_w;
@@ -51,6 +57,12 @@ module datapath (
 		.rd_data(wb_rd_data), .rs1_data(rs1_data), .rs2_data(rs2_data)
 	);
 
+	csr_file csr_file (
+		.clk(clk), .rst(rst),
+		.w_enable(wb_csr),
+		.addr(csr_addr), .wdata(csr_wdata),
+		.rdata(csr_rdata)
+	);
 
 	// Fetch Stage (1st Stage)	
 	fetch fetch (
@@ -67,10 +79,12 @@ module datapath (
 	decode_execute decode_execute (
 		.ir(F_DE_ir_w), .pc(pc),
 		.rs1_data(rs1_data), .rs2_data(rs2_data), // from regfile
+		.csr_rdata(csr_rdata), // from csr_file
 		.rs1_num(rs1_num), .rs2_num(rs2_num), // to regfile
 		.opcode(DE_MW_opcode_w), .func3(DE_MW_func3_w),
 		.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .rd_data(DE_MW_rd_data_w),
-		.imm(DE_F_imm), .pc_sel(pc_sel), .br_taken(br_taken) // to fetch
+		.imm(DE_F_imm), .pc_sel(pc_sel), .br_taken(br_taken), // to fetch
+		.csr_addr(csr_addr), .csr_wdata(csr_wdata), .wb_csr(wb_csr) // to csr_file
 	);
 
 
