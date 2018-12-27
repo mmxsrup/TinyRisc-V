@@ -148,8 +148,7 @@ module decode
 				if (opcode == 7'b1100111) src_a_sel = `SEL_SRC_A_PC; // JALR
 				else src_a_sel = `SEL_SRC_A_RS1;
 			end
-			TYPE_R, TYPE_S : src_a_sel = `SEL_SRC_A_RS1;
-			TYPE_B : src_a_sel = `SEL_SRC_A_NONE;
+			TYPE_B : src_a_sel = `SEL_SRC_A_RS1;
 			TYPE_U : begin
 				case (opcode)
 					7'b0110111 : src_a_sel = `SEL_SRC_A_IMM; // LUI
