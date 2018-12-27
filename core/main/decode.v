@@ -84,7 +84,7 @@ module decode
 		case (type)
 			TYPE_I : imm = { {21{code[31]}}, code[30 : 20] };
 			TYPE_S : imm = { {21{code[31]}}, code[30 : 25], code[11 : 7] };
-			TYPE_B : imm = { {20{code[12]}}, code[7], code[30 : 25], code[11 : 8], 1'b0 };
+			TYPE_B : imm = { {20{code[31]}}, code[7], code[30 : 25], code[11 : 8], 1'b0 };
 			TYPE_U : imm = { code[31 : 12], 12'b0 };
 			TYPE_J : imm = { {12{code[31]}}, code[19 : 12], code[20], code[30 : 21], 1'b0 };
 			default : imm = 32'b0;
