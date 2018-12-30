@@ -38,7 +38,7 @@ module csr_file (
 				csrs[i] = 32'h0;
 			end
 		end else if (w_enable) begin
-			csrs[addr] <= rdata;
+			csrs[addr] <= wdata;
 		end
 	end // always @(posedge clk) 
 
