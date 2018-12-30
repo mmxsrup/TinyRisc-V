@@ -20,6 +20,7 @@ module csr_file (
 
 	reg [31 : 0] csrs[4095 : 0];
 
+	assign rdata = csrs[addr];
 	assign mtvec = csrs[`CSR_ADDR_MTVEC];
 	assign mepc  = csrs[`CSR_ADDR_MEPC];
 
@@ -33,7 +34,7 @@ module csr_file (
 	// write back
 	always @(posedge clk) begin
 		if (rst) begin
-			for (integer i = 0; i < 32; i = i + 1) begin
+			for (integer i = 0; i < 4096; i = i + 1) begin
 				csrs[i] = 32'h0;
 			end
 		end else if (w_enable) begin
