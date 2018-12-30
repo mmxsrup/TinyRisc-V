@@ -216,7 +216,7 @@ module decode
 	always @(*) begin
 		if (opcode == 7'b1110011) begin
 			if (code[31 : 20] == 12'h0) begin // ECALL
-				csr_wdata = pc;
+				csr_wdata = 32'd11;
 			end else begin
 				case (func3)
 					// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
@@ -243,7 +243,7 @@ module decode
 	always @(*) begin
 		if (opcode == 7'b1110011) begin
 			if (code[31 : 20] == 12'h0) begin // ECALL
-				csr_addr = `CSR_ADDR_MEPC;
+				csr_addr = `CSR_ADDR_MCAUSE;
 			end else begin
 				csr_addr = code[31 : 20];
 			end
