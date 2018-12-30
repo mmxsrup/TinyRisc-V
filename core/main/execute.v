@@ -42,7 +42,7 @@ module execute (
 
 	alu alu (
 		.operator(alu_op_sel),
-		.operand1(alu_src_a), .operand2(alu_src_b),
+		.imm(imm), .operand1(alu_src_a), .operand2(alu_src_b),
 		.out(alu_out)
 	);
 
