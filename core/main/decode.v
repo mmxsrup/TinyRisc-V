@@ -214,54 +214,58 @@ module decode
 
 	// generate csr_wdata
 	always @(*) begin
-		if (code[11 : 7] != 5'h0) begin // csr*
-			case (func3)
-				// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
-				3'b001 : csr_wdata = rs1_data;
-				// csrrs rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|x[rs1]; x[rd]=t
-				3'b010 : csr_wdata = csr_rdata | rs1_data;
-				// csrrc rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t&~x[rs1]; x[rd]=t
-				3'b011 : csr_wdata = csr_rdata & ~rs1_data;
-				// csrrwi rd,csr,zimm[4:0] x[rd]=CSRs[csr]; CSRs[csr]=zimm
-				3'b101 : csr_wdata = zimm;
-				// csrrsi rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|zimm; x[rd]=t
-				3'b110 : csr_wdata = csr_rdata | zimm;
-				// csrrci rd,csr,zimm[4:0] t=CSRs[csr]; CSRs[csr]=t&~zimm; x[rd]=t
-				3'b111 : csr_wdata = csr_rdata & ~zimm;
-				default: csr_wdata = csr_rdata;
-			endcase // (func3)
-		end else begin
+		if (opcode == 7'b1110011) begin
 			if (code[31 : 20] == 12'h0) begin // ECALL
 				csr_wdata = pc;
 			end else begin
-				csr_wdata = 32'h0;
+				case (func3)
+					// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
+					3'b001 : csr_wdata = rs1_data;
+					// csrrs rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|x[rs1]; x[rd]=t
+					3'b010 : csr_wdata = csr_rdata | rs1_data;
+					// csrrc rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t&~x[rs1]; x[rd]=t
+					3'b011 : csr_wdata = csr_rdata & ~rs1_data;
+					// csrrwi rd,csr,zimm[4:0] x[rd]=CSRs[csr]; CSRs[csr]=zimm
+					3'b101 : csr_wdata = zimm;
+					// csrrsi rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|zimm; x[rd]=t
+					3'b110 : csr_wdata = csr_rdata | zimm;
+					// csrrci rd,csr,zimm[4:0] t=CSRs[csr]; CSRs[csr]=t&~zimm; x[rd]=t
+					3'b111 : csr_wdata = csr_rdata & ~zimm;
+					default: csr_wdata = csr_rdata;
+				endcase // (func3)
 			end
+		end else begin
+			csr_wdata = 32'h0;
 		end
 	end
 
 	// generate csr_addr
 	always @(*) begin
-		if (code[11 : 7] != 5'h0) begin // csr*
-			csr_addr = code[31 : 20];
-		end else begin
+		if (opcode == 7'b1110011) begin
 			if (code[31 : 20] == 12'h0) begin // ECALL
 				csr_addr = `CSR_ADDR_MEPC;
 			end else begin
-				csr_addr = `CSR_ADDR_NONE;
+				csr_addr = code[31 : 20];
 			end
+		end else begin
+			csr_addr = `CSR_ADDR_NONE;
 		end
 	end
 
 	// generate csr_wb
 	always @(*) begin
-		if (code[11 : 7] != 5'h0) begin // csr*
-			csr_wb = 1;
+		if (opcode == 7'b1110011) begin
+			case (func3)
+				3'b001 : csr_wb = 1; // CSRRW
+				3'b101 : csr_wb = 1; // CSRRWI
+				3'b000 : begin
+					if (code[31 : 20] == 12'h0) csr_wb = 1; // ECALL
+					else csr_wb = 0;
+				end
+				default : csr_wb = 0;
+			endcase // (func3)
 		end else begin
-			if (code[31 : 20] == 12'h0) begin // ECALL
-				csr_wb = 1;
-			end else begin
-				csr_wb = 0;
-			end
+			csr_wb = 0;
 		end
 	end
 
