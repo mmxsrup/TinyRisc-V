@@ -28,7 +28,7 @@ module control (
 	assign fetch_stall_o = 0;
 	assign pc_sel_o = (state != IDLE) ? pc_sel_i : `SEL_PC_NONE;
 	assign br_taken_o = br_taken_i;
-	assign next_pc_o = next_pc_i;
+	assign next_pc_o = (state != IDLE) ? next_pc_i : 32'h0;
 
 
 	always @(posedge clk) begin
