@@ -34,7 +34,7 @@ module decode_execute ( // decode and execute
 	// to csr_file
 	output [11 : 0] csr_addr,
 	output [31 : 0] csr_wdata,
-	output wb_csr
+	output csr_wb
 );
 	
 	parameter OP_BRANCH = 7'b1100011;
@@ -53,15 +53,13 @@ module decode_execute ( // decode and execute
 	assign rd_data = (opcode == 7'b1110011) ? csr_rdata : alu_out;
 	assign imm = imm_w;
 
-	assign csr_addr = ir[31 : 20];
-
 	decode decode (
-		.code(ir), .rs1_data(rs1_data), .csr_rdata(csr_rdata),
+		.code(ir), .pc(pc), .rs1_data(rs1_data), .csr_rdata(csr_rdata),
 		.rs1_num(rs1_num), .rs2_num(rs2_num), .rd_num(rd_num), .imm(imm_w),
 		.alu_op_sel(alu_op_sel),
 		.src_a_sel(src_a_sel), .src_b_sel(src_b_sel), .pc_sel(pc_sel),
 		.wb_reg(wb_reg),
-		.csr_wdata(csr_wdata), .wb_csr(wb_csr)
+		.csr_addr(csr_addr), .csr_wdata(csr_wdata), .csr_wb(csr_wb)
 	);
 
 	execute execute (

@@ -16,6 +16,10 @@ module fetch (
 	// from br_cond
 	input taken,
 
+	// from csr_file
+	input [31 : 0] mtvec,
+	input [31 : 0] mepc,
+
 	// to decoder
 	output [31 : 0] ir_code,
 	// to controller
@@ -52,6 +56,7 @@ module fetch (
 		.rs1(rs1), .imm(imm), .pc_sel(pc_sel),
 		.taken(taken),
 		.stall(stall),
+		.mtvec(mtvec), .mepc(mepc),
 		.next_pc(pc_mux_out)
 	);
 

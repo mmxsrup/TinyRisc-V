@@ -2,11 +2,13 @@
 `include "param_src_a_mux.vh"
 `include "param_src_b_mux.vh"
 `include "param_pc_mux.vh"
+`include "param_csr_addr.vh"
 
 module decode
 (
 	// from fetch
 	input [31 : 0] code,
+	input [31 : 0] pc,
 	// from regfile
 	input [31 : 0] rs1_data,
 	// from csr
@@ -30,8 +32,9 @@ module decode
 	output wb_reg, // write back to reg
 
 	// to csr
+	output reg [31 : 0] csr_addr,
 	output reg [31 : 0] csr_wdata,
-	output wb_csr // write back to csr
+	output reg csr_wb // write back to csr
 );
 	
 	parameter TYPE_WIDTH = 3;
@@ -189,6 +192,14 @@ module decode
 		case (opcode)
 			7'b1101111 : pc_sel = `SEL_PC_JAL;
 			7'b1100111 : pc_sel = `SEL_PC_JALR;
+			7'b1110011 : begin // System
+				if (code[14 : 7] == 8'h0) begin
+					if (code[31 : 20] == 12'h0) pc_sel = `SEL_PC_MTVEC;
+					else if (code[31 : 25] == 7'b0011000) pc_sel = `SEL_PC_MEPC;
+				end else begin
+					pc_sel = `SEL_PC_ADD4;
+				end
+			end
 			default  : pc_sel = `SEL_PC_ADD4;
 		endcase // opcode
 	end // always @(*)
@@ -203,23 +214,56 @@ module decode
 
 	// generate csr_wdata
 	always @(*) begin
-		case (func3)
-			// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
-			3'b001 : csr_wdata = rs1_data;
-			// csrrs rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|x[rs1]; x[rd]=t
-			3'b010 : csr_wdata = csr_rdata | rs1_data;
-			// csrrc rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t&~x[rs1]; x[rd]=t
-			3'b011 : csr_wdata = csr_rdata & ~rs1_data;
-			// csrrwi rd,csr,zimm[4:0] x[rd]=CSRs[csr]; CSRs[csr]=zimm
-			3'b101 : csr_wdata = zimm;
-			// csrrsi rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|zimm; x[rd]=t
-			3'b110 : csr_wdata = csr_rdata | zimm;
-			// csrrci rd,csr,zimm[4:0] t=CSRs[csr]; CSRs[csr]=t&~zimm; x[rd]=t
-			3'b111 : csr_wdata = csr_rdata & ~zimm;
-			default: csr_wdata = csr_rdata;
-		endcase
+		if (code[11 : 7] != 5'h0) begin // csr*
+			case (func3)
+				// csrrw rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=x[rs1]; x[rd]=t
+				3'b001 : csr_wdata = rs1_data;
+				// csrrs rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|x[rs1]; x[rd]=t
+				3'b010 : csr_wdata = csr_rdata | rs1_data;
+				// csrrc rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t&~x[rs1]; x[rd]=t
+				3'b011 : csr_wdata = csr_rdata & ~rs1_data;
+				// csrrwi rd,csr,zimm[4:0] x[rd]=CSRs[csr]; CSRs[csr]=zimm
+				3'b101 : csr_wdata = zimm;
+				// csrrsi rd,csr,rs1 t=CSRs[csr]; CSRs[csr]=t|zimm; x[rd]=t
+				3'b110 : csr_wdata = csr_rdata | zimm;
+				// csrrci rd,csr,zimm[4:0] t=CSRs[csr]; CSRs[csr]=t&~zimm; x[rd]=t
+				3'b111 : csr_wdata = csr_rdata & ~zimm;
+				default: csr_wdata = csr_rdata;
+			endcase // (func3)
+		end else begin
+			if (code[31 : 20] == 12'h0) begin // ECALL
+				csr_wdata = pc;
+			end else begin
+				csr_wdata = 32'h0;
+			end
+		end
 	end
 
-	assign wb_csr = (opcode == 7'b1110011) ? 1 : 0;
+	// generate csr_addr
+	always @(*) begin
+		if (code[11 : 7] != 5'h0) begin // csr*
+			csr_addr = code[31 : 20];
+		end else begin
+			if (code[31 : 20] == 12'h0) begin // ECALL
+				csr_addr = `CSR_ADDR_MEPC;
+			end else begin
+				csr_addr = `CSR_ADDR_NONE;
+			end
+		end
+	end
+
+	// generate csr_wb
+	always @(*) begin
+		if (code[11 : 7] != 5'h0) begin // csr*
+			csr_wb = 1;
+		end else begin
+			if (code[31 : 20] == 12'h0) begin // ECALL
+				csr_wb = 1;
+			end else begin
+				csr_wb = 0;
+			end
+		end
+	end
+
 
 endmodule // decode

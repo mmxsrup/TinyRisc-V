@@ -28,8 +28,9 @@ module datapath (
 	wire [31 : 0] csr_addr;
 	wire [31 : 0] csr_rdata;
 	wire [31 : 0] csr_wdata;
-	wire wb_csr;
-
+	wire csr_wb;
+	wire [31 : 0] mtvec;
+	wire [31 : 0] mepc;
 
 	// from fetch to decode_execute
 	wire [31 : 0] F_DE_ir_w;
@@ -42,7 +43,6 @@ module datapath (
 	wire DE_MW_wb_reg_w;
 	wire [4 : 0] DE_MW_rd_num_w;
 	wire [31 : 0] DE_MW_rd_data_w;
-
 
 	reg [31 : 0] pc;
 
@@ -59,9 +59,10 @@ module datapath (
 
 	csr_file csr_file (
 		.clk(clk), .rst(rst),
-		.w_enable(wb_csr),
+		.w_enable(csr_wb),
 		.addr(csr_addr), .wdata(csr_wdata),
-		.rdata(csr_rdata)
+		.rdata(csr_rdata),
+		.mtvec(mtvec), .mepc(mepc)
 	);
 
 	// Fetch Stage (1st Stage)	
@@ -71,6 +72,7 @@ module datapath (
 		.stall(c_fetch_stall), // from controller
 		.rs1(rs1_data), // from regfile
 		.imm(DE_F_imm), .pc_sel(c_pc_sel), .taken(c_br_taken), // from decode_execute
+		.mtvec(mtvec), .mepc(mepc), // from csr_file
 		.ir_code(F_DE_ir_w), .next_pc(next_pc)
 	);
 
@@ -84,7 +86,7 @@ module datapath (
 		.opcode(DE_MW_opcode_w), .func3(DE_MW_func3_w),
 		.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .rd_data(DE_MW_rd_data_w),
 		.imm(DE_F_imm), .pc_sel(pc_sel), .br_taken(br_taken), // to fetch
-		.csr_addr(csr_addr), .csr_wdata(csr_wdata), .wb_csr(wb_csr) // to csr_file
+		.csr_addr(csr_addr), .csr_wdata(csr_wdata), .csr_wb(csr_wb) // to csr_file
 	);
 
 
