@@ -5,7 +5,6 @@ module alu
 	// from 
 	input wire [`ALU_OP_WIDTH - 1 : 0] operator,
 	// from decoder
-	input wire [31 : 0] imm,
 	input wire [31 : 0] operand1,
 	input wire [31 : 0] operand2,
 
@@ -16,7 +15,7 @@ module alu
 
 	wire [SHAMT_WIDTH - 1 : 0] shamt;
 
-	assign shamt = imm[4 : 0];
+	assign shamt = operand2[SHAMT_WIDTH - 1 : 0];
 
 	always @(*) begin
 		case (operator)
