@@ -118,8 +118,8 @@ module decode
 					3'b001 : alu_op_sel = `ALU_OP_SLL;
 					3'b101 : begin
 						case (func7)
-							7'b0100000 : alu_op_sel = `ALU_OP_SRL;
-							7'b0000000 : alu_op_sel = `ALU_OP_SRA;
+							7'b0000000 : alu_op_sel = `ALU_OP_SRL;
+							7'b0100000 : alu_op_sel = `ALU_OP_SRA;
 							default : alu_op_sel = `ALU_OP_NONE;
 						endcase // func7
 					end
