@@ -13,7 +13,7 @@ module dcache #( // data cache
 
 	// to controller
 	output wvalid,
-	output [31 : 0] rdata,
+	output reg [31 : 0] rdata,
 	output rvalid
 
 	// from memory
@@ -56,7 +56,18 @@ module dcache #( // data cache
 	assign wvalid = (wreq && hit) ? 1 : 0;
 	assign rvalid = (rreq && hit) ? 1 : 0;
 
-	assign rdata = (hit && rreq) ? cache_data[addr_index] : 32'b0;
+	always @(*) begin
+		if (hit && rreq) begin
+			case (addr[1 : 0])
+				2'b00 : rdata = cache_data[addr_index];
+				2'b01 : rdata = {cache_data[addr_index + 1][7 :  0], cache_data[addr_index][31 :  8]};
+				2'b10 : rdata = {cache_data[addr_index + 1][15 : 0], cache_data[addr_index][31 : 16]};
+				2'b11 : rdata = {cache_data[addr_index + 1][23 : 0], cache_data[addr_index][31 : 24]};
+			endcase // (addr[1 : 0])
+		end else begin
+			rdata = 32'b0;
+		end
+	end
 
 	always @(posedge clk) begin
 		if (wreq) begin
