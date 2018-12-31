@@ -106,7 +106,10 @@ module decode
 		case (opcode)
 			7'b0010011, 7'b0110011 : begin // OP, OP-IMM
 				case (func3)
-					3'b000 : alu_op_sel = `ALU_OP_ADD;
+					3'b000 : begin
+						if (code[31 : 25] == 7'b0100000 && opcode == 7'b0110011) alu_op_sel = `ALU_OP_SUB;
+						else alu_op_sel = `ALU_OP_ADD;
+					end
 					3'b010 : alu_op_sel = `ALU_OP_SLT;
 					3'b011 : alu_op_sel = `ALU_OP_SLTU;
 					3'b100 : alu_op_sel = `ALU_OP_XOR;
