@@ -20,8 +20,6 @@ module memory_writeback
 	output done
 );
 
-	wire [6 : 0] opcode;
-	wire [2 : 0] func3;
 	wire [31 : 0] dcache_out;
 
 	assign wb_rd_num = rd_num;

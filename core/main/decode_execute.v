@@ -41,7 +41,6 @@ module decode_execute ( // decode and execute
 
 	wire [31 : 0] imm_w;
 	wire [31 : 0] alu_out;
-	wire [6 : 0] opcode;
 	wire [`ALU_OP_WIDTH - 1 : 0]  alu_op_sel;
 	wire [`SEL_SRC_A_WIDTH - 1 : 0] src_a_sel;
 	wire [`SEL_SRC_B_WIDTH - 1 : 0] src_b_sel;
