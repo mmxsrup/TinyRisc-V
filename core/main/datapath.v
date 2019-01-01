@@ -25,7 +25,7 @@ module datapath (
 	wire [4 : 0] wb_rd_num;
 	wire [31 : 0] wb_rd_data;
 	wire wb_enable;
-	wire [31 : 0] csr_addr;
+	wire [11 : 0] csr_addr;
 	wire [31 : 0] csr_rdata;
 	wire [31 : 0] csr_wdata;
 	wire csr_wb;
