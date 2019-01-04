@@ -1,5 +1,6 @@
-module memory
-(
+`include "param_ram.vh"
+
+module memory (
 	input clk,
 	input rst,
 
@@ -12,7 +13,27 @@ module memory
 	// to writeback
 	output reg [31 : 0] rdata, // read data
 	// to controller
-	output done // load or finish done
+	output done, // load or finish done
+
+
+	// write
+	output [`AWIDTH - 1 : 0] ram_awaddr,
+	output [`LWIDTH - 1 : 0] ram_awlen,
+	output ram_awvalid,
+	input ram_awready,
+	output [`DWIDTH - 1 : 0] ram_wdata,
+	input ram_wvalid,
+	output ram_wready,
+	input ram_wlast,
+	// read
+	output [`AWIDTH - 1 : 0] ram_araddr,
+	output [`LWIDTH - 1 : 0] ram_arlen,
+	output ram_arvalid,
+	input ram_arready,
+	input [`DWIDTH - 1 : 0] ram_rdata,
+	input ram_rvalid,
+	output ram_rready,
+	input ram_rlast
 );
 
 
@@ -48,7 +69,7 @@ module memory
 	always @(*) begin
 		case (func3)
 			FUNC3_B  : rdata = { {25{tmp_rdata[7]}}, tmp_rdata[6 : 0] };
-			FUNC3_H  : rdata = { {17{tmp_rdata[15]}}, tmp_rdata[14 : 0] };
+			FUNC3_H  : rdata = { {17{tmp_rdata[15]}}, tmp_rdata[14 : 0]};
 			FUNC3_W  : rdata = tmp_rdata;
 			FUNC3_BU : rdata = { 24'b0, tmp_rdata[7 : 0] };
 			FUNC3_HU : rdata = { 16'b0, tmp_rdata[15 : 0]};
@@ -62,7 +83,11 @@ module memory
 		.addr(addr),
 		.wreq(wreq), .rreq(rreq), 
 		.wdata(wdata), .byte_enable(byte_enable),
-		.wvalid(wvalid), .rdata(tmp_rdata), .rvalid(rvalid)
+		.wvalid(wvalid), .rdata(tmp_rdata), .rvalid(rvalid),
+		.ram_awaddr(ram_awaddr), .ram_awlen(ram_awlen), .ram_awvalid(ram_awvalid), .ram_awready(ram_awready),
+		.ram_wdata(ram_wdata), .ram_wvalid(ram_wvalid), .ram_wready(ram_wready), .ram_wlast(ram_wlast),
+		.ram_araddr(ram_araddr), .ram_arlen(ram_arlen), .ram_arvalid(ram_arvalid), .ram_arready(ram_arready),
+		.ram_rdata(ram_rdata), .ram_rvalid(ram_rvalid), .ram_rready(ram_rready), .ram_rlast(ram_rlast)
 	);
 
 

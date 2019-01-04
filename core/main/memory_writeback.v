@@ -1,3 +1,5 @@
+`include "param_ram.vh"
+
 module memory_writeback
 (
 	input clk,
@@ -17,7 +19,27 @@ module memory_writeback
 	output [31 : 0] wb_rd_data,
 
 	// contoroller
-	output done
+	output done,
+
+
+	// write
+	output [`AWIDTH - 1 : 0] ram_awaddr,
+	output [`LWIDTH - 1 : 0] ram_awlen,
+	output ram_awvalid,
+	input ram_awready,
+	output [`DWIDTH - 1 : 0] ram_wdata,
+	input ram_wvalid,
+	output ram_wready,
+	input ram_wlast,
+	// read
+	output [`AWIDTH - 1 : 0] ram_araddr,
+	output [`LWIDTH - 1 : 0] ram_arlen,
+	output ram_arvalid,
+	input ram_arready,
+	input [`DWIDTH - 1 : 0] ram_rdata,
+	input ram_rvalid,
+	output ram_rready,
+	input ram_rlast
 );
 
 	wire [31 : 0] dcache_out;
@@ -27,7 +49,11 @@ module memory_writeback
 	memory memory (
 		.clk(clk), .rst(rst),
 		.opcode(opcode), .func3(func3), .alu_out(alu_out), .rs2(rs2_data),
-		.rdata(dcache_out), .done(done)
+		.rdata(dcache_out), .done(done),
+		.ram_awaddr(ram_awaddr), .ram_awlen(ram_awlen), .ram_awvalid(ram_awvalid), .ram_awready(ram_awready),
+		.ram_wdata(ram_wdata), .ram_wvalid(ram_wvalid), .ram_wready(ram_wready), .ram_wlast(ram_wlast),
+		.ram_araddr(ram_araddr), .ram_arlen(ram_arlen), .ram_arvalid(ram_arvalid), .ram_arready(ram_arready),
+		.ram_rdata(ram_rdata), .ram_rvalid(ram_rvalid), .ram_rready(ram_rready), .ram_rlast(ram_rlast)
 	);
 
 	writeback writeback (

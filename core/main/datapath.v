@@ -1,4 +1,5 @@
 `include "param_pc_mux.vh"
+`include "param_ram.vh"
 
 module datapath (
 	input clk,
@@ -15,7 +16,47 @@ module datapath (
 	output [`SEL_PC_WIDTH - 1 : 0] pc_sel,
 	output br_taken,
 	output [31 : 0] ir,
-	output [31 : 0] next_pc
+	output [31 : 0] next_pc,
+
+
+	// write
+	output [`AWIDTH - 1 : 0] i_ram_awaddr,
+	output [`LWIDTH - 1 : 0] i_ram_awlen,
+	output i_ram_awvalid,
+	input i_ram_awready,
+	output [`DWIDTH - 1 : 0] i_ram_wdata,
+	input i_ram_wvalid,
+	output i_ram_wready,
+	input i_ram_wlast,
+	// read
+	output [`AWIDTH - 1 : 0] i_ram_araddr,
+	output [`LWIDTH - 1 : 0] i_ram_arlen,
+	output i_ram_arvalid,
+	input i_ram_arready,
+	input [`DWIDTH - 1 : 0] i_ram_rdata,
+	input i_ram_rvalid,
+	output i_ram_rready,
+	input i_ram_rlast,
+
+
+	// write
+	output [`AWIDTH - 1 : 0] d_ram_awaddr,
+	output [`LWIDTH - 1 : 0] d_ram_awlen,
+	output d_ram_awvalid,
+	input d_ram_awready,
+	output [`DWIDTH - 1 : 0] d_ram_wdata,
+	input d_ram_wvalid,
+	output d_ram_wready,
+	input d_ram_wlast,
+	// read
+	output [`AWIDTH - 1 : 0] d_ram_araddr,
+	output [`LWIDTH - 1 : 0] d_ram_arlen,
+	output d_ram_arvalid,
+	input d_ram_arready,
+	input [`DWIDTH - 1 : 0] d_ram_rdata,
+	input d_ram_rvalid,
+	output d_ram_rready,
+	input d_ram_rlast
 );
 		
 	wire [4 : 0] rs1_num;
@@ -73,7 +114,11 @@ module datapath (
 		.rs1(rs1_data), // from regfile
 		.imm(DE_F_imm), .pc_sel(c_pc_sel), .taken(c_br_taken), // from decode_execute
 		.mtvec(mtvec), .mepc(mepc), // from csr_file
-		.ir_code(F_DE_ir_w), .next_pc(next_pc)
+		.ir_code(F_DE_ir_w), .next_pc(next_pc),
+		.ram_awaddr(i_ram_awaddr), .ram_awlen(i_ram_awlen), .ram_awvalid(i_ram_awvalid), .ram_awready(i_ram_awready),
+		.ram_wdata(i_ram_wdata), .ram_wvalid(i_ram_wvalid), .ram_wready(i_ram_wready), .ram_wlast(i_ram_wlast),
+		.ram_araddr(i_ram_araddr), .ram_arlen(i_ram_arlen), .ram_arvalid(i_ram_arvalid), .ram_arready(i_ram_arready),
+		.ram_rdata(i_ram_rdata), .ram_rvalid(i_ram_rvalid), .ram_rready(i_ram_rready), .ram_rlast(i_ram_rlast)
 	);
 
 
@@ -96,7 +141,11 @@ module datapath (
 		.opcode(DE_MW_opcode_w), .func3(DE_MW_func3_w),
 		.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .alu_out(DE_MW_rd_data_w), .rs2_data(rs2_data),
 		.wb_enable(wb_enable), .wb_rd_num(wb_rd_num), .wb_rd_data(wb_rd_data), // to regfile
-		.done(memory_done) // to controller
+		.done(memory_done), // to controller
+		.ram_awaddr(d_ram_awaddr), .ram_awlen(d_ram_awlen), .ram_awvalid(d_ram_awvalid), .ram_awready(d_ram_awready),
+		.ram_wdata(d_ram_wdata), .ram_wvalid(d_ram_wvalid), .ram_wready(d_ram_wready), .ram_wlast(d_ram_wlast),
+		.ram_araddr(d_ram_araddr), .ram_arlen(d_ram_arlen), .ram_arvalid(d_ram_arvalid), .ram_arready(d_ram_arready),
+		.ram_rdata(d_ram_rdata), .ram_rvalid(d_ram_rvalid), .ram_rready(d_ram_rready), .ram_rlast(d_ram_rlast)
 	);
 
 

@@ -1,8 +1,7 @@
+`include "param_ram.vh"
+
 module icache #(
-	parameter CACHE_SIZE = 4096,
-	parameter DWIDTH = 32,
-	parameter AWIDTH = 32,
-	parameter LWIDTH = 2
+	parameter CACHE_SIZE = 4096
 ) (
 	input clk,
 	input rst,
@@ -16,20 +15,20 @@ module icache #(
 
 	// from ram and to ram
 	// write
-	output reg [AWIDTH - 1 : 0] ram_awaddr,
-	output reg [LWIDTH - 1 : 0] ram_awlen,
+	output reg [`AWIDTH - 1 : 0] ram_awaddr,
+	output reg [`LWIDTH - 1 : 0] ram_awlen,
 	output reg ram_awvalid,
 	input ram_awready,
-	output reg [DWIDTH - 1 : 0] ram_wdata,
+	output reg [`DWIDTH - 1 : 0] ram_wdata,
 	input ram_wvalid,
 	output reg ram_wready,
 	input ram_wlast,
 	// read
-	output reg [AWIDTH - 1 : 0] ram_araddr,
-	output reg [LWIDTH - 1 : 0] ram_arlen,
+	output reg [`AWIDTH - 1 : 0] ram_araddr,
+	output reg [`LWIDTH - 1 : 0] ram_arlen,
 	output reg ram_arvalid,
 	input ram_arready,
-	input [DWIDTH - 1 : 0] ram_rdata,
+	input [`DWIDTH - 1 : 0] ram_rdata,
 	input ram_rvalid,
 	output reg ram_rready,
 	input ram_rlast

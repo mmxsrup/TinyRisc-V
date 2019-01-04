@@ -1,4 +1,5 @@
 `include "param_pc_mux.vh"
+`include "param_ram.vh"
 
 module fetch (
 	input clk,
@@ -23,7 +24,27 @@ module fetch (
 	// to decoder
 	output [31 : 0] ir_code,
 	// to controller
-	output [31 : 0] next_pc
+	output [31 : 0] next_pc,
+
+
+	// write
+	output [`AWIDTH - 1 : 0] ram_awaddr,
+	output [`LWIDTH - 1 : 0] ram_awlen,
+	output ram_awvalid,
+	input ram_awready,
+	output [`DWIDTH - 1 : 0] ram_wdata,
+	input ram_wvalid,
+	output ram_wready,
+	input ram_wlast,
+	// read
+	output [`AWIDTH - 1 : 0] ram_araddr,
+	output [`LWIDTH - 1 : 0] ram_arlen,
+	output ram_arvalid,
+	input ram_arready,
+	input [`DWIDTH - 1 : 0] ram_rdata,
+	input ram_rvalid,
+	output ram_rready,
+	input ram_rlast
 );
 
 	parameter STATE_SIZE = 2;
@@ -47,7 +68,7 @@ module fetch (
 
 	assign ir_code = (icache_valid) ? icache_data : NOP;
 	assign icache_addr = pc;
-	assign next_pc = pc_mux_out;
+	assign next_pc = (icache_valid) ? pc_mux_out : pc;
 	assign icache_req = (state == RUN) ? 1'b1 : 1'b0;
 
 
@@ -63,7 +84,11 @@ module fetch (
 	icache icache (
 		.clk(clk), .rst(rst),
 		.addr(icache_addr), .req(icache_req),
-		.data(icache_data), .valid(icache_valid)
+		.data(icache_data), .valid(icache_valid),
+		.ram_awaddr(ram_awaddr), .ram_awlen(ram_awlen), .ram_awvalid(ram_awvalid), .ram_awready(ram_awready),
+		.ram_wdata(ram_wdata), .ram_wvalid(ram_wvalid), .ram_wready(ram_wready), .ram_wlast(ram_wlast),
+		.ram_araddr(ram_araddr), .ram_arlen(ram_arlen), .ram_arvalid(ram_arvalid), .ram_arready(ram_arready),
+		.ram_rdata(ram_rdata), .ram_rvalid(ram_rvalid), .ram_rready(ram_rready), .ram_rlast(ram_rlast)
 	);
 
 
@@ -78,7 +103,7 @@ module fetch (
 					else state <= WAIT; // Cache MISS
 				end
 				WAIT : begin // TODO
-					state <= WAIT;
+					if (icache_valid) state <= RUN;
 				end
 				default : state <= RUN;
 			endcase // case (state)
