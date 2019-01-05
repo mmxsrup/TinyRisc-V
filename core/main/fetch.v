@@ -1,5 +1,4 @@
 `include "param_pc_mux.vh"
-`include "param_ram.vh"
 
 module fetch (
 	input clk,
@@ -26,25 +25,12 @@ module fetch (
 	// to controller
 	output [31 : 0] next_pc,
 
-
-	// write
-	output [`AWIDTH - 1 : 0] ram_awaddr,
-	output [`LWIDTH - 1 : 0] ram_awlen,
-	output ram_awvalid,
-	input ram_awready,
-	output [`DWIDTH - 1 : 0] ram_wdata,
-	input ram_wvalid,
-	output ram_wready,
-	input ram_wlast,
-	// read
-	output [`AWIDTH - 1 : 0] ram_araddr,
-	output [`LWIDTH - 1 : 0] ram_arlen,
-	output ram_arvalid,
-	input ram_arready,
-	input [`DWIDTH - 1 : 0] ram_rdata,
-	input ram_rvalid,
-	output ram_rready,
-	input ram_rlast
+	// from icache
+	input [31 : 0] icache_data,
+	input icache_valid,
+	// to icache
+	output [31 : 0] icache_addr,
+	output icache_req
 );
 
 	parameter STATE_SIZE = 2;
@@ -56,12 +42,6 @@ module fetch (
 
 	reg [STATE_SIZE - 1 : 0] state;
 
-	// from icache
-	wire [31 : 0] icache_data;
-	wire icache_valid;
-	// to icache
-	wire [31 : 0] icache_addr;
-	wire icache_req;
 
 	// from pc_mux
 	wire [31 : 0] pc_mux_out;
@@ -79,16 +59,6 @@ module fetch (
 		.stall(stall),
 		.mtvec(mtvec), .mepc(mepc),
 		.next_pc(pc_mux_out)
-	);
-
-	icache icache (
-		.clk(clk), .rst(rst),
-		.addr(icache_addr), .req(icache_req),
-		.data(icache_data), .valid(icache_valid),
-		.ram_awaddr(ram_awaddr), .ram_awlen(ram_awlen), .ram_awvalid(ram_awvalid), .ram_awready(ram_awready),
-		.ram_wdata(ram_wdata), .ram_wvalid(ram_wvalid), .ram_wready(ram_wready), .ram_wlast(ram_wlast),
-		.ram_araddr(ram_araddr), .ram_arlen(ram_arlen), .ram_arvalid(ram_arvalid), .ram_arready(ram_arready),
-		.ram_rdata(ram_rdata), .ram_rvalid(ram_rvalid), .ram_rready(ram_rready), .ram_rlast(ram_rlast)
 	);
 
 
