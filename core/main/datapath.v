@@ -1,5 +1,4 @@
 `include "param_pc_mux.vh"
-`include "param_ram.vh"
 
 module datapath (
 	input clk,
@@ -18,45 +17,19 @@ module datapath (
 	output [31 : 0] ir,
 	output [31 : 0] next_pc,
 
+	input [31 : 0] icache_data,
+	input icache_valid,
+	output [31 : 0] icache_addr,
+	output icache_req,
 
-	// write
-	output [`AWIDTH - 1 : 0] i_ram_awaddr,
-	output [`LWIDTH - 1 : 0] i_ram_awlen,
-	output i_ram_awvalid,
-	input i_ram_awready,
-	output [`DWIDTH - 1 : 0] i_ram_wdata,
-	input i_ram_wvalid,
-	output i_ram_wready,
-	input i_ram_wlast,
-	// read
-	output [`AWIDTH - 1 : 0] i_ram_araddr,
-	output [`LWIDTH - 1 : 0] i_ram_arlen,
-	output i_ram_arvalid,
-	input i_ram_arready,
-	input [`DWIDTH - 1 : 0] i_ram_rdata,
-	input i_ram_rvalid,
-	output i_ram_rready,
-	input i_ram_rlast,
-
-
-	// write
-	output [`AWIDTH - 1 : 0] d_ram_awaddr,
-	output [`LWIDTH - 1 : 0] d_ram_awlen,
-	output d_ram_awvalid,
-	input d_ram_awready,
-	output [`DWIDTH - 1 : 0] d_ram_wdata,
-	input d_ram_wvalid,
-	output d_ram_wready,
-	input d_ram_wlast,
-	// read
-	output [`AWIDTH - 1 : 0] d_ram_araddr,
-	output [`LWIDTH - 1 : 0] d_ram_arlen,
-	output d_ram_arvalid,
-	input d_ram_arready,
-	input [`DWIDTH - 1 : 0] d_ram_rdata,
-	input d_ram_rvalid,
-	output d_ram_rready,
-	input d_ram_rlast
+	input dcache_wvalid,
+	input [31 : 0] dcache_rdata,
+	input dcache_rvalid,
+	output [31 : 0] dcache_addr,
+	output dcache_wreq,
+	output dcache_rreq,
+	output [31 : 0] dcache_wdata,
+	output [3 : 0] dcache_byte_enable
 );
 		
 	wire [4 : 0] rs1_num;
@@ -85,21 +58,6 @@ module datapath (
 	wire [4 : 0] DE_MW_rd_num_w;
 	wire [31 : 0] DE_MW_rd_data_w;
 
-
-	wire [31 : 0] icache_data;
-	wire icache_valid;
-	wire [31 : 0] icache_addr;
-	wire icache_req;
-
-	wire [31 : 0] dcache_addr;
-	wire dcache_wreq;
-	wire dcache_rreq;
-	wire [31 : 0] dcache_wdata;
-	wire [3 : 0] dcache_byte_enable;
-	wire dcache_wvalid;
-	wire [31 : 0] dcache_rdata;
-	wire dcache_rvalid;
-
 	wire [31 : 0] dcache_out;
 
 	reg [31 : 0] pc;
@@ -122,26 +80,6 @@ module datapath (
 		.rdata(csr_rdata),
 		.mtvec(mtvec), .mepc(mepc)
 	);
-
-	icache icache (
-		.clk(clk), .rst(rst),
-		.addr(icache_addr), .req(icache_req), .data(icache_data), .valid(icache_valid),
-		.ram_awaddr(i_ram_awaddr), .ram_awlen(i_ram_awlen), .ram_awvalid(i_ram_awvalid), .ram_awready(i_ram_awready),
-		.ram_wdata(i_ram_wdata), .ram_wvalid(i_ram_wvalid), .ram_wready(i_ram_wready), .ram_wlast(i_ram_wlast),
-		.ram_araddr(i_ram_araddr), .ram_arlen(i_ram_arlen), .ram_arvalid(i_ram_arvalid), .ram_arready(i_ram_arready),
-		.ram_rdata(i_ram_rdata), .ram_rvalid(i_ram_rvalid), .ram_rready(i_ram_rready), .ram_rlast(i_ram_rlast)
-	);
-
-	dcache dcache (
-		.clk(clk), .rst(rst),
-		.addr(dcache_addr), .wreq(dcache_wreq), .rreq(dcache_rreq), .wdata(dcache_wdata), .byte_enable(dcache_byte_enable),
-		.wvalid(dcache_wvalid), .rdata(dcache_rdata), .rvalid(dcache_rvalid),
-		.ram_awaddr(d_ram_awaddr), .ram_awlen(d_ram_awlen), .ram_awvalid(d_ram_awvalid), .ram_awready(d_ram_awready),
-		.ram_wdata(d_ram_wdata), .ram_wvalid(d_ram_wvalid), .ram_wready(d_ram_wready), .ram_wlast(d_ram_wlast),
-		.ram_araddr(d_ram_araddr), .ram_arlen(d_ram_arlen), .ram_arvalid(d_ram_arvalid), .ram_arready(d_ram_arready),
-		.ram_rdata(d_ram_rdata), .ram_rvalid(d_ram_rvalid), .ram_rready(d_ram_rready), .ram_rlast(d_ram_rlast)
-	);
-
 
 
 	// Fetch Stage (1st Stage)	
@@ -169,21 +107,6 @@ module datapath (
 		.imm(DE_F_imm), .pc_sel(pc_sel), .br_taken(br_taken), // to fetch
 		.csr_addr(csr_addr), .csr_wdata(csr_wdata), .csr_wb(csr_wb) // to csr_file
 	);
-
-
-	// // Memory Access and Write Back Stage (3rd Stage)
-	// memory_writeback memory_writeback (
-	// 	.clk(clk), .rst(rst),
-	// 	.opcode(DE_MW_opcode_w), .func3(DE_MW_func3_w),
-	// 	.wb_reg(DE_MW_wb_reg_w), .rd_num(DE_MW_rd_num_w), .alu_out(DE_MW_rd_data_w), .rs2_data(rs2_data),
-	// 	.wb_enable(wb_enable), .wb_rd_num(wb_rd_num), .wb_rd_data(wb_rd_data), // to regfile
-	// 	.done(memory_done), // to controller
-	// 	.ram_awaddr(d_ram_awaddr), .ram_awlen(d_ram_awlen), .ram_awvalid(d_ram_awvalid), .ram_awready(d_ram_awready),
-	// 	.ram_wdata(d_ram_wdata), .ram_wvalid(d_ram_wvalid), .ram_wready(d_ram_wready), .ram_wlast(d_ram_wlast),
-	// 	.ram_araddr(d_ram_araddr), .ram_arlen(d_ram_arlen), .ram_arvalid(d_ram_arvalid), .ram_arready(d_ram_arready),
-	// 	.ram_rdata(d_ram_rdata), .ram_rvalid(d_ram_rvalid), .ram_rready(d_ram_rready), .ram_rlast(d_ram_rlast)
-	// );
-
 
 
 	memory memory (
